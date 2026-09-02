@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
-  SparklesIcon,
   DashboardIcon,
   UserIcon,
   UsersIcon,
@@ -11,6 +10,7 @@ import {
   LogOutIcon,
   XMarkIcon,
 } from '../Icons'
+import aithonLogo from '../../assets/aithon-logo.png'
 
 export default function AdminSidebar({ mobileOpen, setMobileOpen, onOpenHelp }) {
   const location = useLocation()
@@ -77,20 +77,15 @@ export default function AdminSidebar({ mobileOpen, setMobileOpen, onOpenHelp }) 
           <div className="h-16 px-5 border-b border-slate-800/80 flex items-center justify-between">
             <Link
               to="/admin/dashboard"
-              className="flex items-center gap-2.5 focus:outline-none"
+              className="flex items-center focus:outline-none"
               onClick={() => setMobileOpen && setMobileOpen(false)}
             >
-              <div className="w-8 h-8 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 flex items-center justify-center shadow-[0_0_10px_rgba(6,182,212,0.25)]">
-                <SparklesIcon className="w-4 h-4" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-mono font-bold text-sm text-white tracking-wider">
-                  AI THON <span className="text-cyan-400">2.0</span>
-                </span>
-                <span className="text-[9px] font-mono text-cyan-400/80 tracking-widest uppercase">
-                  ADMIN CONSOLE
-                </span>
-              </div>
+              <img
+                src={aithonLogo}
+                alt="AiTHON 2.0"
+                className="object-contain w-auto"
+                style={{ height: '36px', maxWidth: '148px' }}
+              />
             </Link>
 
             {/* Mobile close button */}

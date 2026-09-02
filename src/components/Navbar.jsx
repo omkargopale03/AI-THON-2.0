@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { SparklesIcon } from './Icons'
+import aithonLogo from '../assets/aithon-logo.png'
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -21,21 +21,15 @@ export default function Navbar() {
           {/* Logo / Brand */}
           <Link
             to="/"
-            className="flex items-center gap-3 group focus:outline-none"
+            className="flex items-center focus:outline-none group"
             aria-label="AI THON 2.0 Homepage"
           >
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-950/80 border border-cyan-400/40 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.3)] group-hover:border-cyan-300 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.5)] transition-all duration-300">
-              <SparklesIcon className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform duration-300" />
-              <div className="absolute -inset-0.5 bg-cyan-400/20 rounded-lg blur-sm -z-10 group-hover:opacity-100 opacity-60 transition-opacity" />
-            </div>
-            <div className="flex flex-col">
-              <span className="font-extrabold text-xl tracking-wider text-white font-mono flex items-center gap-1.5">
-                AI THON <span className="text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">2.0</span>
-              </span>
-              <span className="text-[10px] tracking-widest text-cyan-400/70 font-mono uppercase -mt-1">
-                National Hackathon
-              </span>
-            </div>
+            <img
+              src={aithonLogo}
+              alt="AiTHON 2.0"
+              className="object-contain w-auto transition-opacity duration-300 group-hover:opacity-80"
+              style={{ height: '48px', maxWidth: '200px' }}
+            />
           </Link>
 
           {/* Desktop Navigation Links */}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { SparklesIcon, ShieldCheckIcon, MailIcon, ArrowRightIcon } from '../../components/Icons'
+import { ShieldCheckIcon, MailIcon, ArrowRightIcon } from '../../components/Icons'
+import aithonLogo from '../../assets/aithon-logo.png'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('admin@aithon.io')
@@ -38,12 +39,14 @@ export default function AdminLogin() {
       <div className="relative w-full max-w-md rounded-3xl bg-[#090d1a]/95 border border-cyan-500/30 p-8 backdrop-blur-xl shadow-[0_0_50px_rgba(6,182,212,0.15)] space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 mb-2 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
-            <SparklesIcon className="w-6 h-6" />
+          <div className="flex justify-center mb-3">
+            <img
+              src={aithonLogo}
+              alt="AiTHON 2.0"
+              className="object-contain w-auto"
+              style={{ height: '56px', maxWidth: '220px' }}
+            />
           </div>
-          <h1 className="text-xl font-mono font-extrabold text-white tracking-wider m-0">
-            AI THON <span className="text-cyan-400">2.0</span>
-          </h1>
           <p className="text-[11px] font-mono tracking-widest text-cyan-400/80 uppercase">
             ADMINISTRATION CONSOLE
           </p>

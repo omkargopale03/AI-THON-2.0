@@ -17,18 +17,18 @@ import {
 } from '../../components/Icons'
 
 export default function AdminDashboard() {
-  const { stats, analytics, participants, teams, submissions } = useAdmin()
+  const { stats, analytics, participants, teams, teamStats, submissions } = useAdmin()
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false)
   const [chartView, setChartView] = useState('7days') // 'today', 'yesterday', '7days'
   const navigate = useNavigate()
 
-  // Calculate team status distribution
+  // Team status distribution computed from live teamStats (auto-updates on approve/reject)
   const teamStatusCounts = {
-    approved: teams.filter((t) => t.status === 'Approved').length,
-    pending: teams.filter((t) => t.status === 'Pending').length,
-    rejected: teams.filter((t) => t.status === 'Rejected').length,
+    approved: teamStats.approved,
+    pending: teamStats.pending,
+    rejected: teamStats.rejected,
   }
-  const totalTeamsCount = teams.length || 1
+  const totalTeamsCount = teamStats.total || 1
 
   // Calculate submission status distribution
   const subStatusCounts = {
@@ -95,15 +95,15 @@ export default function AdminDashboard() {
           />
           <StatCard
             title="TOTAL TEAMS"
-            value={stats.totalTeams.value}
-            change={stats.totalTeams.change}
-            isPositive={stats.totalTeams.isPositive}
-            subtext={stats.totalTeams.subtext}
+            value={teamStats.total}
+            change={`${teamStats.approved} approved`}
+            isPositive
+            subtext={`${teamStats.pending} pending review`}
             icon={UsersIcon}
           />
           <StatCard
             title="SUBMISSIONS"
-            value={stats.submissions.value}
+            value={submissions.length}
             change={stats.submissions.change}
             isPositive={stats.submissions.isPositive}
             subtext={stats.submissions.subtext}
@@ -111,10 +111,10 @@ export default function AdminDashboard() {
           />
           <StatCard
             title="PENDING REVIEW"
-            value={stats.pendingReview.value}
-            change={stats.pendingReview.change}
-            isPositive={stats.pendingReview.isPositive}
-            subtext={stats.pendingReview.subtext}
+            value={teamStats.pending}
+            change={teamStats.pending > 0 ? 'Requires Action' : 'All reviewed'}
+            isPositive={teamStats.pending === 0}
+            subtext="pending team approvals"
             icon={ClockIcon}
           />
         </div>
@@ -300,6 +300,26 @@ export default function AdminDashboard() {
                 </div>
                 <ArrowRightIcon className="w-4 h-4 text-slate-400 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
               </button>
+
+              {/* Pending Reviews shortcut — navigates to /admin/teams?status=pending */}
+              {teamStats.pending > 0 && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin/teams?status=pending')}
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 hover:bg-amber-950/40 text-amber-300 hover:text-amber-200 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-amber-950/60 text-amber-400 group-hover:scale-105 transition-transform">
+                      <ClockIcon className="w-4 h-4" />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-xs font-mono font-bold block">Pending Team Reviews</span>
+                      <span className="text-[10px] font-mono text-amber-400/70">{teamStats.pending} team(s) awaiting review</span>
+                    </div>
+                  </div>
+                  <ArrowRightIcon className="w-4 h-4 text-amber-400/60 group-hover:text-amber-300 group-hover:translate-x-1 transition-all" />
+                </button>
+              )}
 
               <button
                 type="button"

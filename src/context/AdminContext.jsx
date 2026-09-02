@@ -12,6 +12,14 @@ import {
 
 const AdminContext = createContext(null)
 
+// Helper: format current timestamp as a readable string
+function nowTimestamp() {
+  const d = new Date()
+  const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+  const time = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
+  return `${date} ${time}`
+}
+
 export function AdminProvider({ children }) {
   const [stats, setStats] = useState(INITIAL_STATS)
   const [analytics] = useState(REGISTRATION_ANALYTICS)
@@ -32,21 +40,100 @@ export function AdminProvider({ children }) {
     { id: 3, text: 'Discord server member count crossed 1,500+', time: '2h ago', unread: false },
   ])
 
-  // Participant status updater
+  // ─── PARTICIPANT ACTIONS ──────────────────────────────────────────────────
   const updateParticipantStatus = (id, newStatus) => {
     setParticipants((prev) =>
       prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
     )
   }
 
-  // Team status updater
-  const updateTeamStatus = (id, newStatus) => {
+  // ─── TEAM APPROVAL / REJECTION WORKFLOW ─────────────────────────────────
+  // TODO (Firebase): Replace with Firestore updateDoc call to "teams/{id}" document.
+
+  /**
+   * Approve a team. Sets status → 'approved', records reviewedAt/reviewedBy,
+   * and appends a review history entry.
+   */
+  const approveTeam = (id) => {
+    const ts = nowTimestamp()
     setTeams((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status: 'approved',
+              rejectionReason: null,
+              reviewedAt: ts,
+              reviewedBy: adminUser.name,
+              // Prepare reviewHistory for future re-submission cycles
+              reviewHistory: [
+                ...(t.reviewHistory || []),
+                { action: 'approved', reason: null, reviewedBy: adminUser.name, reviewedAt: ts },
+              ],
+            }
+          : t
+      )
     )
+    setNotifications((prev) => [
+      { id: Date.now(), text: `Team approved by Admin`, time: 'Just now', unread: true },
+      ...prev,
+    ])
   }
 
-  // Submission status updater
+  /**
+   * Reject a team. Sets status → 'rejected', stores the rejection reason,
+   * records reviewedAt/reviewedBy, and appends a review history entry.
+   * @param {string} id - Team ID
+   * @param {string} reason - Selected common reason
+   * @param {string} additionalDetails - Optional free-text explanation
+   */
+  const rejectTeam = (id, reason, additionalDetails = '') => {
+    const ts = nowTimestamp()
+    const fullReason = additionalDetails ? `${reason} — ${additionalDetails}` : reason
+    setTeams((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status: 'rejected',
+              rejectionReason: reason,
+              rejectionDetails: additionalDetails,
+              reviewedAt: ts,
+              reviewedBy: adminUser.name,
+              // Prepare reviewHistory for future re-submission cycles
+              reviewHistory: [
+                ...(t.reviewHistory || []),
+                {
+                  action: 'rejected',
+                  reason: fullReason,
+                  reviewedBy: adminUser.name,
+                  reviewedAt: ts,
+                },
+              ],
+            }
+          : t
+      )
+    )
+    setNotifications((prev) => [
+      { id: Date.now(), text: `Team rejected: "${reason}"`, time: 'Just now', unread: true },
+      ...prev,
+    ])
+  }
+
+  // Legacy updateTeamStatus kept for backward compat with other pages that may still call it
+  const updateTeamStatus = (id, newStatus) => {
+    if (newStatus === 'Approved' || newStatus === 'approved') {
+      approveTeam(id)
+    } else if (newStatus === 'Rejected' || newStatus === 'rejected') {
+      rejectTeam(id, 'Status updated by admin', '')
+    } else {
+      setTeams((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
+      )
+    }
+  }
+
+  // ─── SUBMISSION ACTIONS ──────────────────────────────────────────────────
   const updateSubmissionStatus = (id, newStatus, feedback = '', score = null) => {
     setSubmissions((prev) =>
       prev.map((s) =>
@@ -62,7 +149,7 @@ export function AdminProvider({ children }) {
     )
   }
 
-  // Announcement creator
+  // ─── ANNOUNCEMENT ACTIONS ────────────────────────────────────────────────
   const addAnnouncement = (newAnnouncement) => {
     const created = {
       id: `ANN-0${announcements.length + 1}`,
@@ -77,13 +164,21 @@ export function AdminProvider({ children }) {
     ])
   }
 
-  // Settings updater
+  // ─── SETTINGS ACTIONS ────────────────────────────────────────────────────
   const updateSettings = (newSettings) => {
     setSettings((prev) => ({ ...prev, ...newSettings }))
   }
 
   const markAllNotificationsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })))
+  }
+
+  // ─── COMPUTED TEAM STATS (always derived from live state) ────────────────
+  const teamStats = {
+    total: teams.length,
+    approved: teams.filter((t) => t.status === 'approved').length,
+    pending: teams.filter((t) => t.status === 'pending').length,
+    rejected: teams.filter((t) => t.status === 'rejected').length,
   }
 
   return (
@@ -94,6 +189,7 @@ export function AdminProvider({ children }) {
         analytics,
         participants,
         teams,
+        teamStats,
         submissions,
         announcements,
         settings,
@@ -101,6 +197,8 @@ export function AdminProvider({ children }) {
         notifications,
         updateParticipantStatus,
         updateTeamStatus,
+        approveTeam,
+        rejectTeam,
         updateSubmissionStatus,
         addAnnouncement,
         updateSettings,

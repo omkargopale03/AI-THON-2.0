@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import aithonLogo from '../assets/aithon-logo.png'
 import Navbar from '../components/Navbar'
 import RegistrationProgress from '../components/RegistrationProgress'
 import RegistrationInfo from '../components/RegistrationInfo'
@@ -379,6 +380,16 @@ export default function Registration() {
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* PAGE HERO */}
         <section className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+          {/* AiTHON 2.0 Logo */}
+          <div className="flex justify-center mb-4">
+            <img
+              src={aithonLogo}
+              alt="AiTHON 2.0"
+              className="w-auto object-contain"
+              style={{ maxHeight: '90px', maxWidth: '320px', width: '100%' }}
+            />
+          </div>
+
           {/* Small Cyan Uppercase Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/70 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold tracking-widest uppercase mb-4 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
